@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#efe7d8">
+<title>Kris Kringle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#efe7d8; --card:#f7f2e8; --ink:#23211d; --muted:#756c5f; --line:#d9ccb5;
+    --red:#cf3b2d; --red-d:#a92c20; --green:#1d5a3b; --gold:#cf8f2c; --ok:#1d5a3b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh; background:var(--paper); color:var(--ink);
+    font:16px/1.5 "Archivo",system-ui,sans-serif; font-stretch:100%;
+  }
+  /* paper grain over everything */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.38;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .32  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  main{max-width:680px;margin:0 auto;padding:22px 18px 90px}
+
+  /* ---------- type ---------- */
+  .kick{font-weight:800;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  h1,h2,.display{font-stretch:75%;font-weight:900;text-transform:uppercase;letter-spacing:-.005em;line-height:.92;margin:0}
+  h1{font-size:clamp(44px,11vw,76px)}
+  h2{font-size:26px;margin-bottom:6px}
+  .lede{color:var(--muted);margin:8px 0 0;max-width:36em}
+  header.top{margin:6px 0 20px}
+
+  /* ---------- poster ---------- */
+  .poster{
+    position:relative;container-type:inline-size;width:100%;max-width:440px;margin:0 auto 18px;
+    aspect-ratio:4/5;background:var(--card);overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,.05),0 18px 40px -18px rgba(60,40,10,.35);
+  }
+  .poster svg.art{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .poster .vert{
+    position:absolute;right:5.5cqw;top:6cqw;writing-mode:vertical-rl;text-orientation:upright;
+    font-weight:900;font-stretch:100%;line-height:1;letter-spacing:-.12em;color:var(--c,var(--red))
+  }
+  .poster .num{position:absolute;right:5cqw;bottom:3.5cqw;font-weight:800;font-stretch:100%;font-size:15cqw;line-height:1;letter-spacing:-.03em}
+  .poster .kicker{position:absolute;left:6cqw;top:6cqw;max-width:52cqw}
+  .poster .kicker b{display:block;font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:11cqw;line-height:.9}
+  .poster .kicker span{display:block;font-weight:700;font-size:3.3cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:1.6cqw}
+  .poster .foot{position:absolute;left:6cqw;bottom:5cqw;font-weight:700;font-size:3.3cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  button.poster{border:0;padding:0;font:inherit;color:inherit;cursor:pointer;display:block;text-align:left}
+  button.poster:active{transform:scale(.99)}
+  .bloom circle{animation:grow .55s cubic-bezier(.3,1.5,.5,1) backwards;animation-delay:var(--d);transform-box:fill-box;transform-origin:center}
+  @keyframes grow{from{transform:scale(0)}}
+  .wobble{animation:wob 2.6s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:rotate(0)}50%{transform:rotate(-1.2deg) translateY(-2px)}}
+  @media (prefers-reduced-motion:reduce){.bloom circle,.wobble{animation:none}}
+
+  /* ---------- cards & forms ---------- */
+  .card{background:var(--card);border:1.5px solid var(--line);border-radius:4px;padding:22px;margin:0 0 16px}
+  .card .sub{color:var(--muted);margin:0 0 14px;font-size:14.5px}
+  label.f{display:block;font-weight:800;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+  input[type=text],textarea,select{
+    width:100%;font:inherit;color:inherit;background:#fffdf8;border:1.5px solid var(--line);
+    border-radius:3px;padding:10px 12px;outline:none;transition:border-color .15s
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--ink)}
+  textarea{resize:vertical;min-height:90px}
+  .row{display:flex;gap:10px;align-items:center}
+  .row>*{flex:1}
+  .grid3{display:grid;grid-template-columns:2fr 1fr 1.4fr;gap:10px}
+  @media (max-width:560px){.grid3{grid-template-columns:1fr}.row.stack{flex-direction:column;align-items:stretch!important}.row.stack>*{width:100%}}
+  button{font:inherit;cursor:pointer;border:0;border-radius:3px;padding:11px 18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:14px;transition:transform .08s,background .15s}
+  button:active{transform:scale(.97)}
+  .btn{background:var(--red);color:#fff8ee}
+  .btn:hover{background:var(--red-d)}
+  .btn.big{width:100%;padding:17px;font-size:16px}
+  .btn:disabled{opacity:.6}
+  .ghost{background:transparent;border:1.5px solid var(--ink);color:var(--ink)}
+  .small{padding:7px 12px;font-size:12px}
+  .x{background:none;color:var(--muted);padding:6px 10px;flex:0 0 auto;letter-spacing:0}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{background:#fffdf8;border:1.5px solid var(--line);color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;font-size:15px;padding:8px 13px}
+  .chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#f7f2e8}
+  .chip[aria-pressed=true]::before{content:"✦ ";color:var(--gold)}
+  .tag{display:inline-block;background:#fffdf8;border:1.5px solid var(--green);color:var(--green);border-radius:3px;padding:5px 11px;margin:0 6px 6px 0;font-weight:600;font-size:15px}
+  .tag.need{border-color:var(--red);color:var(--red)}
+  .meta{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-top:10px}
+  .meta span{font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:11.5px;color:var(--muted)}
+  .meta b{color:var(--ink);font-size:15px;letter-spacing:0;text-transform:none;margin-left:4px}
+  .status{font-size:13.5px;color:var(--muted);min-height:1.4em;margin-top:8px}
+  .status.ok{color:var(--ok)} .status.err{color:var(--red)}
+  .banner{background:var(--gold);color:var(--ink);border-radius:3px;padding:10px 14px;font-size:14px;margin:0 0 16px}
+  .warn{border:1.5px dashed var(--gold);border-radius:3px;padding:12px 14px;font-size:14.5px}
+  .err-box{border:1.5px solid var(--red);color:var(--red-d);border-radius:3px;padding:12px 14px;font-size:14.5px;margin-top:12px}
+  .plist{list-style:none;margin:0;padding:0}
+  .plist li{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1.5px solid var(--line)}
+  .plist li:first-child{border-top:0}
+  .plist .nm{flex:1;font-weight:800;font-size:17px}
+  .plist .st{font-size:13px;color:var(--muted);display:block;font-weight:500}
+  .plist .st.ok{color:var(--ok)}
+  .pairs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .pair{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fffdf8;border-radius:3px;padding:4px 4px 4px 10px;font-weight:600;font-size:14.5px}
+  .pair .x{padding:2px 8px}
+  .center{text-align:center}
+  .muted{color:var(--muted)}
+  .note-out{white-space:pre-wrap;background:#fffdf8;border:1.5px solid var(--line);border-radius:3px;padding:12px 14px;margin-top:6px}
+  .group-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin:16px 0 8px}
+  footer{color:var(--muted);text-align:center;font-size:13px;margin-top:26px}
+  .hidden{display:none!important}
+  a{color:var(--red)}
+</style>
+</head>
+<body>
+<!-- shared print-texture filter for all halftone art -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.28" numOctaves="2" seed="4" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main id="app"><p class="muted center" style="margin-top:30vh">Loading…</p></main>
+
+<script src="config.js"></script>
+<script type="module">
+/* ============================================================
+   Storage: Firebase Firestore if configured, otherwise demo
+   mode (localStorage, this browser only).
+   ============================================================ */
+const CFG = window.KK_CONFIG || {};
+const FB = "https://www.gstatic.com/firebasejs/10.12.2/";
+
+async function makeStore(){
+  const c = CFG.firebase || {};
+  if (c.apiKey && c.projectId){
+    const { initializeApp } = await import(FB + "firebase-app.js");
+    const fs = await import(FB + "firebase-firestore.js");
+    const db = fs.getFirestore(initializeApp(c));
+    return {
+      demo:false,
+      async get(p){ const s = await fs.getDoc(fs.doc(db,p)); return s.exists() ? s.data() : null; },
+      async set(p,d){ await fs.setDoc(fs.doc(db,p), d); },
+      async createMany(list){ const b = fs.writeBatch(db); for (const [p,d] of list) b.set(fs.doc(db,p), d); await b.commit(); },
+      watch(p,cb){ return fs.onSnapshot(fs.doc(db,p), s => cb(s.exists() ? s.data() : null), e => cb(null, e)); }
+    };
+  }
+  const K = p => "kk-demo:" + p, subs = {};
+  const read = p => { try { return JSON.parse(localStorage.getItem(K(p))); } catch { return null; } };
+  const fire = p => (subs[p]||[]).forEach(cb => cb(read(p)));
+  addEventListener("storage", e => { if (e.key?.startsWith("kk-demo:")) fire(e.key.slice(8)); });
+  return {
+    demo:true,
+    async get(p){ return read(p); },
+    async set(p,d){ localStorage.setItem(K(p), JSON.stringify(d)); fire(p); },
+    async createMany(list){ for (const [p,d] of list){ localStorage.setItem(K(p), JSON.stringify(d)); fire(p); } },
+    watch(p,cb){ (subs[p] ||= []).push(cb); setTimeout(() => cb(read(p)), 0); return () => subs[p] = subs[p].filter(f => f !== cb); }
+  };
+}
+
+/* ============================================================
+   Halftone art: shapes are painted as soft greyscale on a hidden
+   canvas, then sampled on a grid and redrawn as SVG dots whose
+   size follows the tone. Same seed = same picture every time.
+   ============================================================ */
+const COL = { red:"#cf3b2d", green:"#1d5a3b", gold:"#cf8f2c", ink:"#23211d", sky:"#3f8fc7" };
+const W = 300, H = 375, CELL = 7.5;
+
+function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hash(s){ let h = 2166136261; for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; }
+
+// Paint with a soft halo so dots shrink away at the edges (the "dissolving" look).
+function painted(fn, R){
+  const off = document.createElement("canvas"); off.width = W; off.height = H;
+  const o = off.getContext("2d");
+  fn(o);
+  // mottled ink: knock soft lighter patches out of the tone
+  o.globalCompositeOperation = "destination-out"; o.filter = "blur(14px)";
+  for (let i=0;i<9;i++){ o.fillStyle = `rgba(0,0,0,${(.18 + R()*.32).toFixed(2)})`; o.beginPath(); o.arc(R()*W, R()*H, 18 + R()*42, 0, 7); o.fill(); }
+  o.globalCompositeOperation = "source-over"; o.filter = "none";
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  x.filter = "blur(9px)"; x.globalAlpha = .75; x.drawImage(off,0,0);
+  x.filter = "blur(2px)"; x.globalAlpha = 1; x.drawImage(off,0,0);
+  return x.getImageData(0,0,W,H).data;
+}
+
+function dots(data, color, R, { bloom=false, cell=CELL, gain=1 } = {}){
+  let out = "";
+  for (let y = cell/2; y < H; y += cell){
+    for (let x = cell/2; x < W; x += cell){
+      let a = data[((y|0)*W + (x|0))*4 + 3] / 255 * gain;
+      a *= .88 + R()*.24;                       // uneven ink
+      let r;
+      if (a < .06){ if (R() < .012) r = cell*.16; else continue; }   // stray specks
+      else r = Math.min(cell*.76, cell*.8*Math.pow(a, .85));
+      const d = bloom ? ` style="--d:${Math.round(y/H*650 + R()*160)}ms"` : "";
+      out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(2)}"${d}/>`;
+    }
+  }
+  return `<g fill="${color}">${out}</g>`;
+}
+
+// 4-point sparkle like the posters
+const sparkle = (x,y,s,c) => `<path fill="${c}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})" d="M0-10Q1.3-1.3 10 0Q1.3 1.3 0 10Q-1.3 1.3-10 0Q-1.3-1.3 0-10Z"/>`;
+
+function shade(x, x0, x1, a0=1, a1=.22){ const g = x.createLinearGradient(x0,0,x1,0); g.addColorStop(0,`rgba(0,0,0,${a0})`); g.addColorStop(.55,`rgba(0,0,0,${(a0+a1)/1.7})`); g.addColorStop(1,`rgba(0,0,0,${a1})`); return g; }
+function ball(x, cx, cy, r){ const g = x.createRadialGradient(cx-r*.38, cy-r*.38, r*.04, cx, cy, r); g.addColorStop(0,"rgba(0,0,0,.12)"); g.addColorStop(.45,"rgba(0,0,0,.7)"); g.addColorStop(1,"rgba(0,0,0,1)"); x.fillStyle = g; x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.fill(); }
+function starPath(x, cx, cy, r1, r2, n=5){ x.beginPath(); for (let i=0;i<n*2;i++){ const r = i%2 ? r2 : r1, a = -Math.PI/2 + i*Math.PI/n; x.lineTo(cx + Math.cos(a)*r, cy + Math.sin(a)*r); } x.closePath(); }
+
+const MOTIFS = {
+  tree: { color:"green", layers:[
+    ["green", x => {
+      const cx = W*.44, top = H*.27, bot = H*.86;
+      for (let k=0;k<5;k++){
+        const t0 = top + (bot-top)*k*.17, t1 = top + (bot-top)*(k+1)*.19 + 6, half = W*(.07 + .058*(k+1));
+        x.fillStyle = shade(x, cx-half, cx+half); x.beginPath(); x.moveTo(cx, t0); x.lineTo(cx+half, t1); x.lineTo(cx-half, t1); x.closePath(); x.fill();
+      }
+      x.fillStyle = "rgba(0,0,0,.9)"; x.fillRect(cx-W*.035, bot-4, W*.07, H*.07);
+    }],
+    ["gold", x => { x.fillStyle = "rgba(0,0,0,1)"; starPath(x, W*.44, H*.25, W*.085, W*.036); x.fill(); }]
+  ]},
+  baubles: { color:"red", layers:[
+    ["red", x => {
+      for (const [cx,cy,r] of [[W*.38,H*.7,W*.24],[W*.22,H*.38,W*.11],[W*.62,H*.36,W*.14]]){
+        ball(x,cx,cy,r); x.fillStyle = "rgba(0,0,0,1)"; x.fillRect(cx-r*.18, cy-r-r*.16, r*.36, r*.2);
+      }
+    }]
+  ], extra: R => [[W*.38,H*.7,W*.24],[W*.22,H*.38,W*.11],[W*.62,H*.36,W*.14]].map(([cx,cy,r]) => `<line x1="${cx}" y1="0" x2="${cx}" y2="${cy-r-r*.16}" stroke="${COL.red}" stroke-width="1.4"/>`).join("") },
+  star: { color:"gold", layers:[
+    ["gold", x => {
+      const g = x.createRadialGradient(W*.38,H*.42,8,W*.44,H*.5,W*.4); g.addColorStop(0,"rgba(0,0,0,.35)"); g.addColorStop(1,"rgba(0,0,0,1)");
+      x.fillStyle = g; starPath(x, W*.44, H*.5, W*.4, W*.17); x.fill();
+    }]
+  ]},
+  gift: { color:"red", layers:[
+    ["red", x => {
+      x.fillStyle = shade(x, W*.16, W*.76, 1, .45); x.fillRect(W*.16, H*.46, W*.6, H*.38);
+      x.fillStyle = shade(x, W*.12, W*.8, 1, .55); x.fillRect(W*.12, H*.37, W*.68, H*.1);
+      x.globalCompositeOperation = "destination-out"; x.fillStyle = "#000"; x.fillRect(W*.42, H*.37, W*.08, H*.47); x.fillRect(W*.12, H*.4, W*.68, H*.035);
+    }],
+    ["gold", x => {
+      x.fillStyle = "rgba(0,0,0,1)"; x.fillRect(W*.42, H*.37, W*.08, H*.47); x.fillRect(W*.12, H*.4, W*.68, H*.035);
+      x.beginPath(); x.ellipse(W*.38, H*.32, W*.08, H*.045, -.5, 0, Math.PI*2); x.fill();
+      x.beginPath(); x.ellipse(W*.54, H*.32, W*.08, H*.045, .5, 0, Math.PI*2); x.fill();
+    }]
+  ]},
+  forest: { color:"green", layers:[
+    ["green", x => {
+      for (const [cx,top,half,a] of [[W*.2,H*.3,W*.13,.45],[W*.62,H*.12,W*.18,.6],[W*.4,H*.22,W*.2,1]]){
+        x.fillStyle = shade(x, cx-half, cx+half, a, a*.4); x.beginPath(); x.moveTo(cx,top); x.lineTo(cx+half,H*.92); x.lineTo(cx-half,H*.92); x.closePath(); x.fill();
+      }
+    }],
+    ["red", x => { const R = rng(7); x.fillStyle = "rgba(0,0,0,1)"; for (let i=0;i<14;i++){ x.beginPath(); x.arc(W*(.2+R()*.5), H*(.35+R()*.5), 3.2, 0, 7); x.fill(); } }]
+  ]},
+};
+const MOTIF_NAMES = ["tree","baubles","star","forest"];
+const motifFor = name => MOTIF_NAMES[hash(name.toLowerCase()) % MOTIF_NAMES.length];
+
+const artCache = new Map();
+function artSVG(motif, seed, { bloom=false } = {}){
+  const key = motif + seed + bloom;
+  if (artCache.has(key)) return artCache.get(key);
+  const m = MOTIFS[motif], R = rng(seed);
+  let g = "";
+  for (const [col, fn] of m.layers) g += dots(painted(fn, R), COL[col], R, { bloom });
+  let sp = "";
+  const n = 5 + Math.floor(R()*3);
+  for (let i=0;i<n;i++){
+    let x, y, t = 0;
+    do { x = W*(.05 + R()*.74); y = H*(.06 + R()*.86); } while (x < W*.56 && y < H*.24 && ++t < 20);
+    const s = .35 + R()*.9;
+    sp += sparkle(x, y, s, i % 3 ? COL[m.color === "gold" ? "green" : "gold"] : COL[m.color]);
+  }
+  for (let i=0;i<10;i++) sp += `<circle cx="${(W*(.05+R()*.78)).toFixed(1)}" cy="${(H*(.05+R()*.9)).toFixed(1)}" r="${(1+R()*1.6).toFixed(1)}" fill="${COL[m.color]}"/>`;
+  const svg = `<svg class="art${bloom ? " bloom" : ""}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g filter="url(#ink)">${g}${m.extra ? m.extra(R) : ""}${sp}</g></svg>`;
+  artCache.set(key, svg);
+  return svg;
+}
+
+function poster({ motif, seed=1, vert="", kicker="", sub="", num="", foot="", bloom=false, tag="div", id="" }){
+  const m = MOTIFS[motif], letters = [...vert];
+  const fs = Math.min(13, 96 / Math.max(letters.length, 1));
+  return `<${tag} class="poster" ${id ? `id="${id}"` : ""} style="--c:${COL[m.color === "gold" ? "red" : m.color]}">
+    ${artSVG(motif, seed, { bloom })}
+    ${vert ? `<div class="vert" style="font-size:${fs.toFixed(2)}cqw">${esc(vert.toUpperCase())}</div>` : ""}
+    ${kicker || sub ? `<div class="kicker">${kicker ? `<b>${esc(kicker)}</b>` : ""}${sub ? `<span>${esc(sub)}</span>` : ""}</div>` : ""}
+    ${foot ? `<div class="foot">${esc(foot)}</div>` : ""}
+    ${num ? `<div class="num">${esc(num)}</div>` : ""}
+  </${tag}>`;
+}
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const B62 = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+const token = (n=18) => Array.from(crypto.getRandomValues(new Uint32Array(n)), v => B62[v % B62.length]).join("");
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const lines = s => s.split("\n").map(x => x.trim()).filter(Boolean);
+const baseURL = () => location.origin + location.pathname;
+const yearNum = t => (String(t).match(/20(\d\d)/) || [,String(new Date().getFullYear()).slice(2)])[1];
+const app = $("#app");
+let store, cleanups = [];
+const later = f => cleanups.push(f);
+const on = (el, ev, fn) => { el.addEventListener(ev, fn); later(() => el.removeEventListener(ev, fn)); };
+
+function setPage(html){ cleanups.forEach(f => { try{ f(); }catch{} }); cleanups = []; app.innerHTML = (store?.demo ? `<div class="banner">Demo mode: data is saved in this browser only. Add your Firebase settings to <b>config.js</b> to share it for real.</div>` : "") + html; scrollTo(0,0); }
+
+async function copy(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); const ok = document.execCommand("copy"); t.remove(); return ok; }
+}
+
+// Random draw that respects "can't draw" pairs. Returns giver index -> receiver index, or null.
+function drawPairs(n, banned){
+  const used = Array(n).fill(false), res = Array(n), order = shuffle([...Array(n).keys()]);
+  let steps = 0;
+  const bt = k => {
+    if (k === n) return true;
+    if (++steps > 300000) return false;
+    const g = order[k];
+    for (const r of shuffle([...Array(n).keys()])){
+      if (r === g || used[r] || banned.has(g + "," + r)) continue;
+      used[r] = true; res[g] = r;
+      if (bt(k+1)) return true;
+      used[r] = false;
+    }
+    return false;
+  };
+  return bt(0) ? res : null;
+}
+
+/* ============================================================
+   Page: organiser sets up a new draw
+   ============================================================ */
+function pageSetup(){
+  const d = CFG.defaults || {};
+  const title = d.title || "Family Kris Kringle";
+  setPage(`
+    ${poster({ motif:"tree", seed:26, vert:"Kringle", kicker:"Kris", sub:"Organiser", num:yearNum(title) })}
+    <header class="top"><h1>Draw the names</h1><p class="lede">Check everyone's here, then draw. You'll get a secret link to send each person.</p></header>
+    <section class="card">
+      <h2>The basics</h2>
+      <div class="grid3">
+        <div><label class="f" for="title">Name</label><input type="text" id="title" value="${esc(title)}"></div>
+        <div><label class="f" for="budget">Budget</label><input type="text" id="budget" value="${esc(d.budget || "")}" placeholder="$50"></div>
+        <div><label class="f" for="date">Swap day</label><input type="text" id="date" value="${esc(d.date || "")}" placeholder="Christmas Day"></div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Who's in?</h2>
+      <p class="sub">One name per line.</p>
+      <textarea id="names" rows="10">${esc((d.people||[]).join("\n"))}</textarea>
+      <label class="f">Can't draw each other</label>
+      <div class="pairs" id="pairs"></div>
+      <div class="row" style="flex-wrap:wrap">
+        <select id="pa"></select><span class="muted" style="flex:0 0 auto">&amp;</span><select id="pb"></select>
+        <button class="ghost small" id="addEx" type="button" style="flex:0 0 auto">Add</button>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Gift areas</h2>
+      <p class="sub">One per line. Everyone ticks what suits them.</p>
+      <div class="row stack" style="align-items:flex-start">
+        <div><label class="f" for="into">Things they're into</label><textarea id="into" rows="9">${esc((d.into||[]).join("\n"))}</textarea></div>
+        <div><label class="f" for="need">Things they need</label><textarea id="need" rows="9">${esc((d.need||[]).join("\n"))}</textarea></div>
+      </div>
+    </section>
+    <button class="btn big" id="go">Draw names ✦</button>
+    <div id="err"></div>
+    ${(() => { try { const l = localStorage.getItem("kk-last-admin"); return l ? `<p class="center" style="margin-top:16px"><a href="#admin=${esc(l)}">← Back to your last draw</a></p>` : ""; } catch { return ""; } })()}
+    <footer>Nobody sees the full list of who has whom, including you, unless you open other people's links.</footer>
+  `);
+
+  const names = () => lines($("#names").value);
+  const pairs = (d.pairs || []).map(p => [...p]);
+  const renderPairs = () => {
+    const ns = names();
+    $("#pairs").innerHTML = pairs.map((p,i) => {
+      const bad = !ns.includes(p[0]) || !ns.includes(p[1]);
+      return `<span class="pair" ${bad ? 'style="opacity:.5" title="One of these names isn\'t in the list"' : ""}>${esc(p[0])} ✕ ${esc(p[1])}<button class="x" data-del="${i}" type="button" aria-label="Remove">×</button></span>`;
+    }).join("") || `<span class="muted" style="font-size:14px">None yet</span>`;
+    const opts = `<option value="">Choose…</option>` + ns.map(n => `<option>${esc(n)}</option>`).join("");
+    $("#pa").innerHTML = opts; $("#pb").innerHTML = opts;
+  };
+  renderPairs();
+  on($("#pairs"), "click", e => { const i = e.target.dataset.del; if (i !== undefined){ pairs.splice(+i,1); renderPairs(); } });
+  $("#addEx").onclick = () => { const a = $("#pa").value, b = $("#pb").value; if (a && b && a !== b){ pairs.push([a,b]); renderPairs(); } };
+  $("#names").addEventListener("input", renderPairs);
+
+  $("#go").onclick = async () => {
+    const err = m => $("#err").innerHTML = m ? `<div class="err-box">${m}</div>` : "";
+    err("");
+    const list = names();
+    const lower = list.map(n => n.toLowerCase());
+    if (list.length < 3) return err("You need at least 3 people.");
+    if (list.length > 40) return err("That's a lot of people! Keep it to 40 or fewer.");
+    const dup = lower.find((n,i) => lower.indexOf(n) !== i);
+    if (dup) return err(`"${esc(list[lower.indexOf(dup)])}" is in the list twice. Add an initial to tell them apart.`);
+    const into = lines($("#into").value).slice(0,40), need = lines($("#need").value).slice(0,40);
+    if (!into.length && !need.length) return err("Add at least one gift area.");
+
+    const banned = new Set();
+    for (const [a,b] of pairs){
+      const i = list.indexOf(a), j = list.indexOf(b);
+      if (i < 0 || j < 0 || i === j) continue;
+      banned.add(i+","+j); banned.add(j+","+i);
+    }
+    const res = drawPairs(list.length, banned);
+    if (!res) return err("There's no way to draw names with those pairs. Try removing one.");
+
+    const title = $("#title").value.trim().slice(0,80) || "Kris Kringle";
+    const budget = $("#budget").value.trim().slice(0,40);
+    const date = $("#date").value.trim().slice(0,60);
+    const people = list.map(name => ({ name, token: token(18), pubId: token(18) }));
+    const drawId = token(24);
+    const now = Date.now();
+    const writes = people.map((p,i) => ["people/" + p.token, {
+      name:p.name, pubId:p.pubId, giftsTo:people[res[i]].pubId, giftsToName:people[res[i]].name,
+      title, budget, date, into, need, createdAt:now
+    }]);
+    writes.push(["draws/" + drawId, { title, budget, date, people, createdAt:now }]);
+
+    $("#go").disabled = true; $("#go").textContent = "Drawing…";
+    try {
+      await store.createMany(writes);
+      try { localStorage.setItem("kk-last-admin", drawId); } catch {}
+      location.hash = "admin=" + drawId;
+    } catch (e){
+      console.error(e);
+      err("Couldn't save the draw. Check your Firebase setup and rules (see README). " + esc(e.message || ""));
+      $("#go").disabled = false; $("#go").textContent = "Draw names ✦";
+    }
+  };
+}
+
+/* ============================================================
+   Page: organiser's link list
+   ============================================================ */
+async function pageAdmin(id){
+  setPage(`<p class="muted center" style="margin-top:20vh">Loading…</p>`);
+  const d = await store.get("draws/" + id).catch(() => null);
+  if (!d) return pageMissing("Couldn't find that draw. Check you have the whole organiser link.");
+  const link = p => `${baseURL()}#p=${p.token}`;
+  setPage(`
+    ${poster({ motif:"baubles", seed:hash(id), vert:"Drawn", kicker:"Kris", sub:"Names are in", num:yearNum(d.title) })}
+    <section class="card">
+      <h2>Send the links</h2>
+      <div class="warn"><b>Bookmark this page.</b> It's the only way back to everyone's links. Don't open other people's links unless you want to know who has whom.</div>
+      <ul class="plist" style="margin-top:10px">
+        ${d.people.map((p,i) => `
+          <li>
+            <span class="nm">${esc(p.name)}<span class="st" id="st${i}">Hasn't picked gift areas yet</span></span>
+            ${navigator.share ? `<button class="ghost small" data-share="${i}">Share</button>` : ""}
+            <button class="btn small" data-copy="${i}">Copy link</button>
+          </li>`).join("")}
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Message to send</h2>
+      <p class="sub">Paste this with each person's link.</p>
+      <div class="note-out" id="tmpl">🎄 ${esc(d.title)}! Here's your secret link. It shows who you're buying for and lets you pick what you'd like.${d.budget ? " Budget: " + esc(d.budget) + "." : ""} Don't share it!</div>
+      <div class="row" style="margin-top:12px;flex-wrap:wrap">
+        <button class="ghost small" id="copyAll" style="flex:0 0 auto">Copy all links (for your notes)</button>
+        <a href="#new" style="flex:0 0 auto;font-size:14px">Start another draw</a>
+      </div>
+      <div class="status" id="msg"></div>
+    </section>
+  `);
+  const msg = (t, ok=true) => { const m = $("#msg"); m.textContent = t; m.className = "status " + (ok ? "ok" : "err"); };
+  on(app, "click", async e => {
+    const c = e.target.dataset.copy, s = e.target.dataset.share;
+    if (c !== undefined){
+      const p = d.people[+c];
+      if (await copy(link(p))){ e.target.textContent = "Copied ✓"; setTimeout(() => e.target.textContent = "Copy link", 1600); }
+    }
+    if (s !== undefined){
+      const p = d.people[+s];
+      try { await navigator.share({ title:d.title, text:$("#tmpl").textContent, url:link(p) }); } catch {}
+    }
+  });
+  $("#copyAll").onclick = async () => {
+    const txt = d.people.map(p => `${p.name}: ${link(p)}`).join("\n");
+    msg(await copy(txt) ? "All links copied." : "Couldn't copy. Try one at a time.", true);
+  };
+  d.people.forEach((p,i) => later(store.watch("wishes/" + p.pubId, w => {
+    const el = $("#st" + i); if (!el) return;
+    const n = (w?.into?.length || 0) + (w?.need?.length || 0);
+    if (n || w?.note){ el.textContent = `Picked ${n} gift area${n===1?"":"s"} ✓`; el.className = "st ok"; }
+  })));
+}
+
+/* ============================================================
+   Page: a participant's secret page
+   ============================================================ */
+async function pagePerson(tok){
+  setPage(`<p class="muted center" style="margin-top:20vh">Loading…</p>`);
+  const me = await store.get("people/" + tok).catch(e => { console.error(e); return null; });
+  if (!me) return pageMissing("This link doesn't match a Kris Kringle. Check you copied the whole thing.");
+  const mine = (await store.get("wishes/" + me.pubId).catch(() => null)) || { into:[], need:[], note:"" };
+  const revealKey = "kk-revealed:" + tok;
+  let revealed = false; try { revealed = localStorage.getItem(revealKey) === "1"; } catch {}
+  const yy = yearNum(me.title);
+  const theirPoster = bloom => poster({ motif:motifFor(me.giftsToName), seed:hash(me.giftsTo), vert:me.giftsToName, sub:"You're buying for", num:yy, bloom, id:"them" });
+
+  const chipset = (items, sel, group) => items.map(x =>
+    `<button type="button" class="chip" data-g="${group}" data-v="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`).join("");
+
+  setPage(`
+    <header class="top">
+      <div class="kick">${esc(me.title)}</div>
+      <h1>Hi ${esc(me.name)}</h1>
+      <div class="meta">${me.budget ? `<span>Budget<b>${esc(me.budget)}</b></span>` : ""}${me.date ? `<span>Swap day<b>${esc(me.date)}</b></span>` : ""}</div>
+    </header>
+
+    <div id="revealSlot">
+      ${revealed ? theirPoster(false)
+        : `<div class="wobble">${poster({ motif:"gift", seed:hash(tok), vert:"Unwrap", sub:"Tap to see who you've got", foot:"Make sure nobody's looking", num:yy, tag:"button", id:"env" })}</div>`}
+    </div>
+
+    <section class="card ${revealed ? "" : "hidden"}" id="theirCard">
+      <h2>${esc(me.giftsToName)} would like…</h2>
+      <div id="theirWish"><p class="muted">Loading their picks…</p></div>
+    </section>
+
+    <section class="card">
+      <h2>What would you like?</h2>
+      <p class="sub">Pick a few areas to steer whoever's got you. Saves automatically, and you can change it any time.</p>
+      ${me.into?.length ? `<div class="group-label">I'm into</div><div class="chips">${chipset(me.into, mine.into||[], "into")}</div>` : ""}
+      ${me.need?.length ? `<div class="group-label">I could do with</div><div class="chips">${chipset(me.need, mine.need||[], "need")}</div>` : ""}
+      <label class="f" for="note">Anything else? (sizes, favourite colours, please-no's)</label>
+      <textarea id="note" maxlength="500" placeholder="e.g. Size M, love anything green, no more candles please!">${esc(mine.note || "")}</textarea>
+      <div class="status" id="save"></div>
+    </section>
+    <footer>Keep this link to yourself. Anyone with it can see who you're buying for.</footer>
+  `);
+
+  const env = $("#env");
+  if (env) env.onclick = () => {
+    $("#revealSlot").innerHTML = theirPoster(true);
+    $("#theirCard").classList.remove("hidden");
+    try { localStorage.setItem(revealKey, "1"); } catch {}
+  };
+
+  later(store.watch("wishes/" + me.giftsTo, (w, e) => {
+    const box = $("#theirWish"); if (!box) return;
+    if (e){ box.innerHTML = `<p class="muted">Couldn't load their picks right now.</p>`; return; }
+    const into = w?.into || [], need = w?.need || [], note = w?.note || "";
+    if (!into.length && !need.length && !note){
+      box.innerHTML = `<p class="muted">${esc(me.giftsToName)} hasn't picked anything yet. This updates as soon as they do.</p>`; return;
+    }
+    box.innerHTML =
+      (into.length ? `<div class="group-label">Into</div>${into.map(x => `<span class="tag">${esc(x)}</span>`).join("")}` : "") +
+      (need.length ? `<div class="group-label">Could do with</div>${need.map(x => `<span class="tag need">${esc(x)}</span>`).join("")}` : "") +
+      (note ? `<div class="group-label">Notes</div><div class="note-out">${esc(note)}</div>` : "");
+  }));
+
+  const state = { into:[...(mine.into||[])], need:[...(mine.need||[])], note: mine.note || "" };
+  const status = $("#save");
+  let timer;
+  const save = (delay=500) => {
+    clearTimeout(timer); status.textContent = "Saving…"; status.className = "status";
+    timer = setTimeout(async () => {
+      try {
+        await store.set("wishes/" + me.pubId, { into:state.into, need:state.need, note:state.note.slice(0,500), updatedAt:Date.now() });
+        status.textContent = "Saved ✓"; status.className = "status ok";
+      } catch (e){ console.error(e); status.textContent = "Couldn't save. Check your connection and try again."; status.className = "status err"; }
+    }, delay);
+  };
+  on(app, "click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    const g = b.dataset.g, v = b.dataset.v, on_ = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", on_);
+    if (on_ && !state[g].includes(v)) state[g].push(v);
+    if (!on_) state[g] = state[g].filter(x => x !== v);
+    save(300);
+  });
+  $("#note").addEventListener("input", e => { state.note = e.target.value; save(800); });
+}
+
+function pageMissing(text){
+  setPage(`${poster({ motif:"star", seed:3, vert:"Hmm", sub:"Lost in the snow" })}<section class="card center"><p>${esc(text)}</p></section>`);
+}
+
+/* ============================================================
+   Router
+   ============================================================ */
+function route(){
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get("p")) return pagePerson(h.get("p"));
+  if (h.get("admin")) return pageAdmin(h.get("admin"));
+  return pageSetup();
+}
+
+(async () => {
+  try { store = await makeStore(); }
+  catch (e){ console.error(e); app.innerHTML = `<section class="card"><h2>Couldn't connect</h2><p>Firebase didn't load. Check the settings in config.js.</p></section>`; return; }
+  addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>

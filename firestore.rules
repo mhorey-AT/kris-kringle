@@ -1,0 +1,40 @@
+rules_version = '2';
+// Kris Kringle – paste this into Firebase console → Firestore Database → Rules → Publish.
+//
+// Everything is keyed by long random IDs that only appear inside people's links.
+// "get" (read one doc you know the ID of) is allowed; "list" (browse the
+// collection) is never allowed, so nobody can go fishing for other people's data.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Organiser's page: list of names + links. Written once, never edited.
+    match /draws/{drawId} {
+      allow get: if true;
+      allow create: if drawId.size() >= 20
+        && request.resource.data.keys().hasOnly(['title','budget','date','people','createdAt'])
+        && request.resource.data.people is list
+        && request.resource.data.people.size() <= 40;
+      allow list, update, delete: if false;
+    }
+
+    // Each person's secret page: who they have. Written once at the draw, never edited.
+    match /people/{tok} {
+      allow get: if true;
+      allow create: if tok.size() >= 16
+        && request.resource.data.keys().hasOnly(['name','pubId','giftsTo','giftsToName','title','budget','date','into','need','createdAt']);
+      allow list, update, delete: if false;
+    }
+
+    // What each person would like. Readable by whoever has them, editable by them.
+    match /wishes/{pubId} {
+      allow get: if true;
+      allow create, update: if pubId.size() >= 16
+        && request.resource.data.keys().hasOnly(['into','need','note','updatedAt'])
+        && request.resource.data.into is list && request.resource.data.into.size() <= 40
+        && request.resource.data.need is list && request.resource.data.need.size() <= 40
+        && request.resource.data.note is string && request.resource.data.note.size() <= 500
+        && request.resource.data.updatedAt is int;
+      allow list, delete: if false;
+    }
+  }
+}
