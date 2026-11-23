@@ -23,6 +23,16 @@ window.KK_CONFIG = {
     // Pairs who can't draw each other (works both ways)
     pairs: [["Mungo","Lillian"],["Sebastian","Sinead"],["Edward","Betty"],["Kiel","Anwen"]],
     date: "Christmas Day",
+    // "Finish the sentence" prompts. Keep the ids (p1–p8) stable once people have answered;
+    // you can reword the text any time.
+    prompts: [
+      { id: "p1", text: "I have way too many…" },
+      { id: "p2", text: "I could always use more…" },
+      { id: "p3", text: "My hobbies include…" },
+      { id: "p4", text: "I'd never say no to…" },
+      { id: "p5", text: "Lately I've been really into…" },
+      { id: "p6", text: "Something I've always wanted to try is…" }
+    ],
     into: [
       "Books & reading", "Cooking & kitchen", "Garden & outdoors", "Cosy & comfort",
       "Pamper & self-care", "Tech & gadgets", "Games & puzzles", "Art & craft",

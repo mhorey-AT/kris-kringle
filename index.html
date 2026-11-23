@@ -108,6 +108,11 @@
   .center{text-align:center}
   .muted{color:var(--muted)}
   .note-out{white-space:pre-wrap;background:#fffdf8;border:1.5px solid var(--line);border-radius:3px;padding:12px 14px;margin-top:6px}
+  .prompts{display:grid;gap:12px;margin-top:4px}
+  .prompt label{display:block;font-weight:700;font-size:15.5px;margin-bottom:5px}
+  .said{margin:0 0 8px;font-size:17px;line-height:1.35}
+  .said span{color:var(--muted)}
+  .said b{color:var(--red);font-weight:700}
   .group-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin:16px 0 8px}
   footer{color:var(--muted);text-align:center;font-size:13px;margin-top:26px}
   .hidden{display:none!important}
@@ -257,6 +262,17 @@ const MOTIFS = {
     ["red", x => { const R = rng(7); x.fillStyle = "rgba(0,0,0,1)"; for (let i=0;i<14;i++){ x.beginPath(); x.arc(W*(.2+R()*.5), H*(.35+R()*.5), 3.2, 0, 7); x.fill(); } }]
   ]},
 };
+const DEFAULT_PROMPTS = [
+  { id:"p1", text:"I have way too many…" },
+  { id:"p2", text:"I could always use more…" },
+  { id:"p3", text:"My hobbies include…" },
+  { id:"p4", text:"I'd never say no to…" },
+  { id:"p5", text:"Lately I've been really into…" },
+  { id:"p6", text:"Something I've always wanted to try is…" },
+];
+const PROMPTS = ((CFG.defaults && CFG.defaults.prompts) || DEFAULT_PROMPTS).filter(p => /^p[1-8]$/.test(p.id)).slice(0,8);
+const stem = t => String(t).replace(/[\s.…]+$/,"");
+const answered = w => Object.values(w?.answers || {}).filter(v => String(v).trim()).length;
 const MOTIF_NAMES = ["tree","baubles","star","forest"];
 const motifFor = name => MOTIF_NAMES[hash(name.toLowerCase()) % MOTIF_NAMES.length];
 
@@ -490,8 +506,12 @@ async function pageAdmin(id){
   };
   d.people.forEach((p,i) => later(store.watch("wishes/" + p.pubId, w => {
     const el = $("#st" + i); if (!el) return;
-    const n = (w?.into?.length || 0) + (w?.need?.length || 0);
-    if (n || w?.note){ el.textContent = `Picked ${n} gift area${n===1?"":"s"} ✓`; el.className = "st ok"; }
+    const n = (w?.into?.length || 0) + (w?.need?.length || 0), a = answered(w);
+    if (n || a || w?.note){
+      const parts = [n ? `${n} gift area${n===1?"":"s"}` : "", a ? `${a} sentence${a===1?"":"s"}` : ""].filter(Boolean);
+      el.textContent = parts.length ? parts.join(" · ") + " ✓" : "Filled in ✓";
+      el.className = "st ok";
+    }
   })));
 }
 
@@ -502,7 +522,7 @@ async function pagePerson(tok){
   setPage(`<p class="muted center" style="margin-top:20vh">Loading…</p>`);
   const me = await store.get("people/" + tok).catch(e => { console.error(e); return null; });
   if (!me) return pageMissing("This link doesn't match a Kris Kringle. Check you copied the whole thing.");
-  const mine = (await store.get("wishes/" + me.pubId).catch(() => null)) || { into:[], need:[], note:"" };
+  const mine = (await store.get("wishes/" + me.pubId).catch(() => null)) || { into:[], need:[], note:"", answers:{} };
   const revealKey = "kk-revealed:" + tok;
   let revealed = false; try { revealed = localStorage.getItem(revealKey) === "1"; } catch {}
   const yy = yearNum(me.title);
@@ -537,6 +557,14 @@ async function pagePerson(tok){
       <textarea id="note" maxlength="500" placeholder="e.g. Size M, love anything green, no more candles please!">${esc(mine.note || "")}</textarea>
       <div class="status" id="save"></div>
     </section>
+    <section class="card">
+      <h2>Finish the sentence</h2>
+      <p class="sub">A few words is plenty. Skip any you like.</p>
+      <div class="prompts">
+        ${PROMPTS.map(p => `<div class="prompt"><label for="a_${p.id}">${esc(p.text)}</label><input type="text" id="a_${p.id}" data-a="${p.id}" maxlength="200" value="${esc(mine.answers?.[p.id] || "")}"></div>`).join("")}
+      </div>
+      <div class="status" id="save2"></div>
+    </section>
     <footer>Keep this link to yourself. Anyone with it can see who you're buying for.</footer>
   `);
 
@@ -551,23 +579,31 @@ async function pagePerson(tok){
     const box = $("#theirWish"); if (!box) return;
     if (e){ box.innerHTML = `<p class="muted">Couldn't load their picks right now.</p>`; return; }
     const into = w?.into || [], need = w?.need || [], note = w?.note || "";
-    if (!into.length && !need.length && !note){
+    const said = PROMPTS.filter(p => String(w?.answers?.[p.id] || "").trim());
+    const extra = Object.entries(w?.answers || {}).filter(([k,v]) => String(v).trim() && !PROMPTS.some(p => p.id === k));
+    if (!into.length && !need.length && !note && !said.length && !extra.length){
       box.innerHTML = `<p class="muted">${esc(me.giftsToName)} hasn't picked anything yet. This updates as soon as they do.</p>`; return;
     }
     box.innerHTML =
       (into.length ? `<div class="group-label">Into</div>${into.map(x => `<span class="tag">${esc(x)}</span>`).join("")}` : "") +
       (need.length ? `<div class="group-label">Could do with</div>${need.map(x => `<span class="tag need">${esc(x)}</span>`).join("")}` : "") +
+      (said.length || extra.length ? `<div class="group-label">In their words</div>` +
+        said.map(p => `<p class="said"><span>${esc(stem(p.text))}</span> <b>${esc(w.answers[p.id])}</b></p>`).join("") +
+        extra.map(([,v]) => `<p class="said"><b>${esc(v)}</b></p>`).join("") : "") +
       (note ? `<div class="group-label">Notes</div><div class="note-out">${esc(note)}</div>` : "");
   }));
 
-  const state = { into:[...(mine.into||[])], need:[...(mine.need||[])], note: mine.note || "" };
-  const status = $("#save");
+  const state = { into:[...(mine.into||[])], need:[...(mine.need||[])], note: mine.note || "", answers:{ ...(mine.answers||{}) } };
+  const statusEls = [$("#save"), $("#save2")];
+  const status = { set textContent(t){ statusEls.forEach(e => e.textContent = t); }, set className(c){ statusEls.forEach(e => e.className = c); } };
   let timer;
   const save = (delay=500) => {
     clearTimeout(timer); status.textContent = "Saving…"; status.className = "status";
     timer = setTimeout(async () => {
       try {
-        await store.set("wishes/" + me.pubId, { into:state.into, need:state.need, note:state.note.slice(0,500), updatedAt:Date.now() });
+        const answers = {};
+        for (const [k,v] of Object.entries(state.answers)) if (/^p[1-8]$/.test(k) && String(v).trim()) answers[k] = String(v).trim().slice(0,200);
+        await store.set("wishes/" + me.pubId, { into:state.into, need:state.need, note:state.note.slice(0,500), answers, updatedAt:Date.now() });
         status.textContent = "Saved ✓"; status.className = "status ok";
       } catch (e){ console.error(e); status.textContent = "Couldn't save. Check your connection and try again."; status.className = "status err"; }
     }, delay);
@@ -581,6 +617,7 @@ async function pagePerson(tok){
     save(300);
   });
   $("#note").addEventListener("input", e => { state.note = e.target.value; save(800); });
+  document.querySelectorAll("[data-a]").forEach(inp => inp.addEventListener("input", e => { state.answers[e.target.dataset.a] = e.target.value; save(800); }));
 }
 
 function pageMissing(text){
